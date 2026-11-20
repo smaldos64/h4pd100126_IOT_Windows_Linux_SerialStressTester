@@ -1,0 +1,103 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SerialStressTester.ViewModels"
+        x:Class="SerialStressTester.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Dual UART Buffer Overrun Tester"
+        Width="720" Height="560"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" Margin="20" RowSpacing="15">
+
+        <!-- Port-konfiguration -->
+        <Border Grid.Row="0" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6" Padding="15">
+            <Grid ColumnDefinitions="*,*,Auto,Auto" ColumnSpacing="12">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="TX Port (Sender uint16):" FontWeight="SemiBold"/>
+                    <ComboBox ItemsSource="{Binding AvailablePorts}" 
+                              SelectedItem="{Binding SelectedTxPort}" 
+                              IsEnabled="{Binding !IsRunning}"
+                              HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Text="RX Port (Modtager Overruns):" FontWeight="SemiBold"/>
+                    <ComboBox ItemsSource="{Binding AvailablePorts}" 
+                              SelectedItem="{Binding SelectedRxPort}" 
+                              IsEnabled="{Binding !IsRunning}"
+                              HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Spacing="4">
+                    <TextBlock Text="Baudrate:" FontWeight="SemiBold"/>
+                    <ComboBox ItemsSource="{Binding BaudRates}" 
+                              SelectedItem="{Binding SelectedBaudRate}" 
+                              IsEnabled="{Binding !IsRunning}"
+                              Width="110"/>
+                </StackPanel>
+
+                <Button Grid.Column="3" Content="Opdater porte" 
+                        Command="{Binding RefreshPortsCommand}"
+                        IsEnabled="{Binding !IsRunning}"
+                        VerticalAlignment="Bottom"/>
+            </Grid>
+        </Border>
+
+        <!-- Skyder til afsendelsesinterval (1ms - 1000ms) -->
+        <Border Grid.Row="1" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6" Padding="15">
+            <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Text="Interval mellem afsendelse af tal (1 ms - 1000 ms):" FontWeight="SemiBold"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
+                        <NumericUpDown Value="{Binding IntervalMs}" Minimum="1" Maximum="1000" Increment="1" FormatString="0" Width="120"/>
+                        <TextBlock Text="ms" VerticalAlignment="Center" FontWeight="Bold"/>
+                    </StackPanel>
+                </Grid>
+
+                <Slider Minimum="1" Maximum="1000" Value="{Binding IntervalMs}" TickFrequency="50" IsSnapToTickEnabled="False"/>
+                
+                <Grid ColumnDefinitions="*,*,*">
+                    <TextBlock Grid.Column="0" Text="1 ms (1000 Hz)" FontSize="11" Foreground="Gray"/>
+                    <TextBlock Grid.Column="1" Text="500 ms (2 Hz)" FontSize="11" Foreground="Gray" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="1000 ms (1 Hz)" FontSize="11" Foreground="Gray" HorizontalAlignment="Right"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Kontrolknapper og nøgletal -->
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*" ColumnSpacing="15">
+            <Button Grid.Column="0" Content="Start Test" Command="{Binding StartCommand}" 
+                    IsEnabled="{Binding !IsRunning}" Background="#2E7D32" Foreground="White" Padding="20,10" FontWeight="Bold"/>
+            <Button Grid.Column="1" Content="Stop Test" Command="{Binding StopCommand}" 
+                    IsEnabled="{Binding IsRunning}" Background="#C62828" Foreground="White" Padding="20,10" FontWeight="Bold"/>
+
+            <Border Grid.Column="2" Background="#F4F6F8" CornerRadius="6" Padding="12,8">
+                <Grid ColumnDefinitions="*,*,*">
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Senest sendt (uint16)" FontSize="11" Foreground="Gray"/>
+                        <TextBlock Text="{Binding DisplayLastSent}" FontSize="18" FontWeight="Bold"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Sendt i alt" FontSize="11" Foreground="Gray"/>
+                        <TextBlock Text="{Binding DisplayTotalSent}" FontSize="18" FontWeight="Bold"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Buffer Overruns" FontSize="11" Foreground="Gray"/>
+                        <TextBlock Text="{Binding OverrunCount}" FontSize="18" FontWeight="Bold" Foreground="#C62828"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Log over modtagne buffer overrun tal -->
+        <Border Grid.Row="3" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6" Padding="10">
+            <Grid RowDefinitions="Auto,*">
+                <TextBlock Grid.Row="0" Text="Modtagne tal ved Buffer Overrun (RX):" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <ListBox Grid.Row="1" ItemsSource="{Binding OverrunLog}" FontFamily="Consolas,Monospace" FontSize="13"/>
+            </Grid>
+        </Border>
+
+        <!-- Statuslinje -->
+        <TextBlock Grid.Row="4" Text="{Binding StatusText}" Foreground="#444444" FontStyle="Italic"/>
+    </Grid>
+</Window>
